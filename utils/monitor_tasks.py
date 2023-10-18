@@ -47,7 +47,7 @@ def main(_):
 
     task_counts = {
         "success": 0,
-        "submited": 0,
+        "submitted": 0,
         "started": 0,
         "failed": 0,
         "killed": 0,
@@ -59,21 +59,21 @@ def main(_):
         task = inductiva.tasks.Task(task_id)
         status = task.get_status()
         if status not in task_counts:
-            task_counts[status] = 0
+            task_counts[status] = 1
         else:
             task_counts[status] += 1
 
-    other_tasks = sum(
+    num_other_tasks = sum(
         task_counts[key] for key in set(task_counts.keys()) - original_keys)
 
     logging.info("Tasks still running: %s",
-                 task_counts["submited"] + task_counts["started"])
+                 task_counts["submitted"] + task_counts["started"])
     logging.info("Tasks successfully completed: %s", task_counts["success"])
     logging.info("Tasks failed: %s", task_counts["failed"])
     logging.info("Tasks killed: %s", task_counts["killed"])
-    logging.info("Other tasks: %s", other_tasks)
+    logging.info("Other tasks: %s", num_other_tasks)
 
-    if (task_counts["submited"] + task_counts["started"] == 0 and
+    if (task_counts["submitted"] + task_counts["started"] == 0 and
             FLAGS.terminate_when_done) or FLAGS.force_terminate:
         machine_groups = inductiva.resources.machine_groups.get()
         for machine_group in machine_groups:
