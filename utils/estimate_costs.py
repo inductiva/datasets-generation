@@ -67,6 +67,10 @@ def main(_):
 
     price_per_hour = machine_group.estimate_cloud_cost()
 
+    if not price_per_hour:
+        logging.error("No tasks finished.")
+        return
+
     average_sim_duration = sum(durations) / len(durations)
     logging.info("Average simulation duration: %s seconds",
                  average_sim_duration)
