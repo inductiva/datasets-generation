@@ -114,7 +114,10 @@ def main(_):
                   encoding="utf-8") as f:
             dict_to_save = {
                 "task_ids": [task.id for _, task, _ in obj_task_velocities],
-                "machine_group": machine_group.name
+                "machine_group": machine_group.name,
+                "machine_group_machine_type": FLAGS.machine_type,
+                "machine_group_num_machines": FLAGS.num_machines,
+                "machine_group_disk_size_gb": FLAGS.disk_size_gb
             }
             json.dump(dict_to_save, f)
 
