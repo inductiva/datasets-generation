@@ -53,6 +53,8 @@ def main(_):
         "killed": 0,
     }
 
+    og_keys = set(task_counts.keys())
+
     for task_id in task_ids:
         task = inductiva.tasks.Task(task_id)
         status = task.get_status()
@@ -61,11 +63,15 @@ def main(_):
         else:
             task_counts[status] += 1
 
+    other_tasks = sum(
+        [task_counts[key] for key in set(task_counts.keys()) - og_keys])
+
     logging.info("Tasks still running: %s",
                  task_counts["submited"] + task_counts["started"])
     logging.info("Tasks successfully completed: %s", task_counts["success"])
     logging.info("Tasks failed: %s", task_counts["failed"])
     logging.info("Tasks killed: %s", task_counts["killed"])
+    logging.info("Other tasks: %s", other_tasks)
 
     if (task_counts["submited"] + task_counts["started"] == 0 and
             FLAGS.terminate_when_done) or FLAGS.force_terminate:
