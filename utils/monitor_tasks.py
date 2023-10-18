@@ -64,7 +64,7 @@ def main(_):
             task_counts[status] += 1
 
     other_tasks = sum(
-        [task_counts[key] for key in set(task_counts.keys()) - og_keys])
+        task_counts[key] for key in set(task_counts.keys()) - og_keys)
 
     logging.info("Tasks still running: %s",
                  task_counts["submited"] + task_counts["started"])
