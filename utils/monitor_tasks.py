@@ -53,7 +53,7 @@ def main(_):
         "killed": 0,
     }
 
-    og_keys = set(task_counts.keys())
+    original_keys = set(task_counts.keys())
 
     for task_id in task_ids:
         task = inductiva.tasks.Task(task_id)
@@ -64,7 +64,7 @@ def main(_):
             task_counts[status] += 1
 
     other_tasks = sum(
-        task_counts[key] for key in set(task_counts.keys()) - og_keys)
+        task_counts[key] for key in set(task_counts.keys()) - original_keys)
 
     logging.info("Tasks still running: %s",
                  task_counts["submited"] + task_counts["started"])
