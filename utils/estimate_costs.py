@@ -67,7 +67,7 @@ def main(_):
 
     price_per_hour = machine_group.estimate_cloud_cost()
 
-    if not price_per_hour:
+    if not durations:
         logging.error("No tasks finished.")
         return
 
