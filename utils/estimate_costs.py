@@ -1,6 +1,6 @@
-"""Estimates the costs os tasks based on example simulations
+"""Estimates the costs of tasks based on example simulations.
 
-Assumes the existance of a json file with the following structure:
+Assumes the existence of a json file with the following structure:
 
 {
     "task_ids": [
