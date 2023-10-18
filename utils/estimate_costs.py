@@ -59,6 +59,11 @@ def main(_):
     disk_size = json_data["machine_group_disk_size_gb"]
 
     tasks_successfully_completed = get_successfull_tasks(task_ids)
+
+    if not tasks_successfully_completed:
+        logging.error("Not enough information to perform the task.")
+        return
+
     durations = get_tasks_duration(tasks_successfully_completed)
 
     machine_group = inductiva.resources.MachineGroup(machine_type=machine_type,
@@ -66,10 +71,6 @@ def main(_):
                                                      disk_size_gb=disk_size)
 
     price_per_hour = machine_group.estimate_cloud_cost()
-
-    if not durations:
-        logging.error("No tasks finished.")
-        return
 
     average_sim_duration = sum(durations) / len(durations)
     logging.info("Average simulation duration: %s seconds",
