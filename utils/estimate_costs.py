@@ -22,7 +22,7 @@ from absl import logging
 
 import inductiva
 
-import common
+import utils
 
 FLAGS = flags.FLAGS
 
@@ -49,7 +49,7 @@ def main(_):
     num_machines = json_data["machine_group_num_machines"]
     disk_size = json_data["machine_group_disk_size_gb"]
 
-    tasks_successfully_completed = common.get_successfull_tasks(task_ids)
+    tasks_successfully_completed = utils.get_successfull_tasks(task_ids)
 
     if not tasks_successfully_completed:
         logging.error("Not enough information to perform the task.")

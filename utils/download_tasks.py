@@ -33,7 +33,7 @@ from absl import app
 from absl import flags
 from absl import logging
 
-import common
+import utils
 
 FLAGS = flags.FLAGS
 
@@ -54,7 +54,7 @@ def main(_):
 
     logging.info("Number of tasks: %s", len(task_ids))
 
-    tasks_successfully_completed = common.get_successfull_tasks(task_ids)
+    tasks_successfully_completed = utils.get_successfull_tasks(task_ids)
     logging.info("Tasks successfully completed: %s",
                  len(tasks_successfully_completed))
 
