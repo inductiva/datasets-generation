@@ -22,6 +22,8 @@ from absl import logging
 
 import inductiva
 
+import utils
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("path_to_sim_info", None,
@@ -38,17 +40,6 @@ def get_tasks_duration(tasks):
     return durations
 
 
-def get_successfull_tasks(task_ids):
-    """Gets the tasks that were successfully completed"""
-    successfull_tasks = []
-    for task_id in task_ids:
-        task = inductiva.tasks.Task(task_id)
-        status = task.get_status()
-        if status == "success":
-            successfull_tasks.append(task)
-    return successfull_tasks
-
-
 def main(_):
     # Read the simulation ids
     with open(FLAGS.path_to_sim_info, "r", encoding="utf-8") as f:
@@ -58,7 +49,7 @@ def main(_):
     num_machines = json_data["machine_group_num_machines"]
     disk_size = json_data["machine_group_disk_size_gb"]
 
-    tasks_successfully_completed = get_successfull_tasks(task_ids)
+    tasks_successfully_completed = utils.get_successfull_tasks(task_ids)
 
     if not tasks_successfully_completed:
         logging.error("Not enough information to perform the task.")

@@ -1,18 +1,49 @@
-"""This file downloads the requested tasks"""
+"""This file downloads the requested tasks.
+
+It assumes a .json file containing the simulation ids of the tasks to download:
+
+{
+    "task_ids": [
+        "task_id_1",
+        "task_id_2",
+        ...
+    ]
+}
+
+And a structure like this:
+
+data/
+simulation_info.json
+task_id_1/
+    output_file_1
+    output_file_2
+    ...
+task_id_2/
+    output_file_1
+    output_file_2
+    ...
+...
+
+The output files are downloaded to the corresponding task_id folder.
+"""
+import json
+import os
+
 from absl import app
 from absl import flags
 from absl import logging
 
-import os
-import json
-import warnings
-
-import inductiva
+import utils
 
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("path_to_sim_info", None,
                     "The path to the simulation json info files.")
+
+flags.DEFINE_list("files_to_download", None,
+                  "The names of the output files to download.")
+
+flags.mark_flag_as_required("files_to_download")
 
 
 def main(_):
@@ -23,26 +54,16 @@ def main(_):
 
     logging.info("Number of tasks: %s", len(task_ids))
 
-    tasks_successfully_completed = []
-    for task_id in task_ids:
-        task = inductiva.tasks.Task(task_id)
-        status = task.get_status()
-        if status == "success":
-            tasks_successfully_completed.append(task)
-
+    tasks_successfully_completed = utils.get_successfull_tasks(task_ids)
     logging.info("Tasks successfully completed: %s",
                  len(tasks_successfully_completed))
 
     download_dir = os.path.dirname(FLAGS.path_to_sim_info)
     for task in tasks_successfully_completed:
         save_path = os.path.join(download_dir, task.id)
-        output = task.get_output()
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-            warnings.warn(
-                f"Download task {task.id} for which no directory existed")
-        output.get_object_pressure_field(
-            save_path=os.path.join(save_path, "pressure_field.vtk"))
+        task.download_outputs(FLAGS.files_to_download, output_dir=save_path)
 
 
 if __name__ == "__main__":
