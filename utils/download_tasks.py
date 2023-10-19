@@ -61,6 +61,8 @@ def main(_):
     download_dir = os.path.dirname(FLAGS.path_to_sim_info)
     for task in tasks_successfully_completed:
         save_path = os.path.join(download_dir, task.id)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         task.download_outputs(FLAGS.files_to_download, output_dir=save_path)
 
 
