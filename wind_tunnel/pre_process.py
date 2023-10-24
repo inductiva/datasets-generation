@@ -19,7 +19,7 @@ It processes the data and stores it in the following format:
             - nodes.npy
             - edges.npy
             - flow_velocity.npy
-            - wind_pressures.npy 
+            - wind_pressures.npy
         - id_2
             - nodes.npy
             - edges.npy
