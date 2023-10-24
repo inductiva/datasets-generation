@@ -81,57 +81,82 @@ def read_nodes_edges_pressures(mesh):
     return nodes, edge_list, pressures
 
 
+def remove_folders_without_file(folders, file_name):
+    """Removes folders that do not contain a file"""
+    for folder in folders.copy():
+        if not os.path.exists(os.path.join(folder, file_name)):
+            warnings.warn(f'{folder} does not contain a {file_name} file.')
+            folders.remove(folder)
+
+
+def clean_and_interpolate_mesh(mesh_with_values_path, target_mesh_path,
+                               tolerance):
+    """Interpolates the mesh with values onto the target mesh."""
+    mesh_with_values = pv.read(mesh_with_values_path)
+    target_mesh = pv.read(target_mesh_path)
+    clean_target_mesh = target_mesh.clean()
+    interpolated_mesh = clean_target_mesh.sample(mesh_with_values,
+                                                 tolerance=tolerance)
+    return interpolated_mesh
+
+
+def load_flow_velocity(flow_velocity_path):
+    """Loads the flow velocity from a json file to a numpy array."""
+    with open(flow_velocity_path, encoding='utf-8') as f:
+        flow_velocity = json.load(f)
+    flow_velocity = np.array(flow_velocity)
+    return flow_velocity
+
+
+def process_folder(folder, openfoam_pressure_field_name, original_mesh_name,
+                   wind_vector_name, tolerance, output_dir, nodes_name,
+                   edges_name, save_wind_vector_name, wind_pressures_name):
+    """Processes a single folder."""
+    openfoam_mesh_path = os.path.join(folder, openfoam_pressure_field_name)
+    original_mesh_path = os.path.join(folder, original_mesh_name)
+    interpolated_mesh = clean_and_interpolate_mesh(openfoam_mesh_path,
+                                                   original_mesh_path,
+                                                   tolerance)
+
+    # Extract the nodes, edges and pressures from the interpolated mesh.
+    nodes, edge_list, pressures = read_nodes_edges_pressures(interpolated_mesh)
+
+    # Load the flow velocity
+    wind_vector_path = os.path.join(folder, wind_vector_name)
+    if os.path.exists(wind_vector_path):
+        wind_vector = load_flow_velocity(wind_vector_path)
+
+    # Save the data.
+    save_dir = os.path.join(output_dir, os.path.basename(folder))
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    np.save(os.path.join(save_dir, nodes_name), nodes)
+    np.save(os.path.join(save_dir, edges_name), edge_list)
+    np.save(os.path.join(save_dir, wind_pressures_name), pressures)
+
+    if os.path.exists(wind_vector_path):
+        np.save(os.path.join(save_dir, save_wind_vector_name), wind_vector)
+
+
 def main(_):
     sim_folders = [
         os.path.join(FLAGS.data_dir, f) for f in os.listdir(FLAGS.data_dir)
     ]
 
     # Remove folders that do not contain a .vtk file.
-    for folder in sim_folders.copy():
-        if not os.path.exists(
-                os.path.join(folder, FLAGS.openfoam_pressure_field_name)):
-            warnings.warn(f'{folder} does not contain a .vtk file.')
-            sim_folders.remove(folder)
+    remove_folders_without_file(sim_folders,
+                                file_name=FLAGS.openfoam_pressure_field_name)
+    remove_folders_without_file(sim_folders, file_name=FLAGS.original_mesh_name)
 
     if not os.path.exists(FLAGS.output_dir):
         os.makedirs(FLAGS.output_dir)
 
     for folder in sim_folders:
-        openfoam_mesh_path = os.path.join(folder,
-                                          FLAGS.openfoam_pressure_field_name)
-        original_mesh_path = os.path.join(folder, FLAGS.original_mesh_name)
-
-        openfoam_mesh = pv.read(openfoam_mesh_path)
-        original_mesh = pv.read(original_mesh_path)
-        original_mesh = original_mesh.clean()
-
-        # Map the mesh created by open foam to the original mesh of
-        # the submited object.
-        interpolated_mesh = original_mesh.sample(openfoam_mesh,
-                                                 tolerance=FLAGS.tolerance)
-
-        # Extract the nodes, edges and pressures from the interpolated mesh.
-        nodes, edge_list, pressures = read_nodes_edges_pressures(
-            interpolated_mesh)
-
-        # Load the flow velocity
-        wind_vector_path = os.path.join(folder, FLAGS.wind_vector_name)
-        if os.path.exists(wind_vector_path):
-            with open(wind_vector_path, encoding='utf-8') as f:
-                wind_vector = json.load(f)
-            wind_vector = np.array(wind_vector)
-
-        # Save the data.
-        save_dir = os.path.join(FLAGS.output_dir, os.path.basename(folder))
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        np.save(os.path.join(save_dir, FLAGS.nodes_name), nodes)
-        np.save(os.path.join(save_dir, FLAGS.edges_name), edge_list)
-        np.save(os.path.join(save_dir, FLAGS.wind_pressures_name), pressures)
-
-        if os.path.exists(wind_vector_path):
-            np.save(os.path.join(save_dir, FLAGS.save_wind_vector_name),
-                    wind_vector)
+        process_folder(folder, FLAGS.openfoam_pressure_field_name,
+                       FLAGS.original_mesh_name, FLAGS.wind_vector_name,
+                       FLAGS.tolerance, FLAGS.output_dir, FLAGS.nodes_name,
+                       FLAGS.edges_name, FLAGS.save_wind_vector_name,
+                       FLAGS.wind_pressures_name)
 
 
 if __name__ == '__main__':
