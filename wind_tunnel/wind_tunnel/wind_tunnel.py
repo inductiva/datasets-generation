@@ -59,24 +59,19 @@ class WindTunnel(datasets.GeneratorBasedBuilder):
         Args:
             version: `string`, version of the dataset to use.
         '''
-        super(WindTunnel, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.version = version
         self.bucket_url = _BASE_URL + f'{version}.zip'
 
     def _info(self):
-        return datasets.DatasetInfo(description=_DESCRIPTION,
-                                    features=datasets.Features({
-                                        'nodes':
-                                        datasets.Array2D((None, 3),
-                                                         dtype='float32'),
-                                        'edges':
-                                        datasets.Array2D((None, 2),
-                                                         dtype='int32'),
-                                        'flow_velocity':
-                                        [datasets.Value('float32')],
-                                        'wind_pressures':
-                                        [datasets.Value('float32')]
-                                    }))
+        return datasets.DatasetInfo(
+            description=_DESCRIPTION,
+            features=datasets.Features({
+                'nodes': datasets.Array2D((None, 3), dtype='float32'),
+                'edges': datasets.Array2D((None, 2), dtype='int32'),
+                'flow_velocity': [datasets.Value('float32')],
+                'wind_pressures': [datasets.Value('float32')]
+            }))
 
     def _split_generators(self, dl_manager):
         # Download and extract the zip file in the bucket.
