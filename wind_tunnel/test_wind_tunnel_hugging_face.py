@@ -4,7 +4,7 @@ import datasets
 
 def test_shapes_of_examples():
     """Test number of nodes == number of wind pressures measurements."""
-    dataset = datasets.load_dataset('wind_tunnel/',
+    dataset = datasets.load_dataset('wind_tunnel/wind_tunnel/',
                                     version='5_sims_flow_20_40_processed',
                                     split='train')
     for example in dataset:
