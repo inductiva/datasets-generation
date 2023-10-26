@@ -2,10 +2,10 @@
 
 Hugging face loading script for the wind tunnel data. This script
 assumes that the data is stored on the google cloud bucket
-'gs://wind_tunnel_data/' where several datasets can be stored in zipp
-format. For example:
+'https://storage.googleapis.com/wind_tunnel/' where several datasets
+can be stored in zip format. For example:
 
-gs://wind_tunnel_data/
+https://storage.googleapis.com/wind_tunnel/
 ├── v0.1.zip
 ├── v0.2.zip
 └── v0.3.zip
@@ -45,7 +45,7 @@ import numpy as np
 
 _DESCRIPTION = 'Wind tunnel dataset example.'
 
-_BASE_URL = 'gs://wind_tunnel_data/'
+_BASE_URL = 'https://storage.googleapis.com/wind_tunnel/'
 
 _DEFAULT_FLOW_VELOCITY = [0, 0, 0]
 
@@ -75,6 +75,7 @@ class WindTunnel(datasets.GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         # Download and extract the zip file in the bucket.
+        print(self.bucket_url)
         downloaded_dir = dl_manager.download_and_extract(self.bucket_url)
 
         dirs = [
@@ -97,6 +98,10 @@ class WindTunnel(datasets.GeneratorBasedBuilder):
 
             flow_velocity_path = os.path.join(sim_dir_path,
                                               'flow_velocities.npy')
+            # TODO(augusto): This is only here to provide legacy
+            # supports for datasets that were previously generated
+            # with constant velocities. It will be removed once they
+            # are generated again.
             if os.path.exists(flow_velocity_path):
                 flow_velocity = np.load(flow_velocity_path)
             else:
