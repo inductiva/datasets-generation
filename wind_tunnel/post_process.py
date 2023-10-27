@@ -17,6 +17,16 @@ It processes the data and stores it in the following format:
     - data
         - id_1.json
         - id_2.json
+        - id_1
+            - nodes.npy
+            - edges.npy
+            - flow_velocity.npy
+            - wind_pressures.npy
+        - id_2
+            - nodes.npy
+            - edges.npy
+            - flow_velocity.npy
+            - wind_pressures.npy
 
 NOTE: Here we assume undirected edges, hence each pair (i, j) appears
 only once in the adjancecy list. Several ML frameworks, such as
