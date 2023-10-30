@@ -15,16 +15,8 @@ Assumes the data is in the following format:
 It processes the data and stores it in the following format:
 
     - data
-        - id_1
-            - nodes.npy
-            - edges.npy
-            - flow_velocity.npy
-            - wind_pressures.npy
-        - id_2
-            - nodes.npy
-            - edges.npy
-            - flow_velocity.npy
-            - wind_pressures.npy
+        - id_1.json
+        - id_2.json
 
 NOTE: Here we assume undirected edges, hence each pair (i, j) appears
 only once in the adjancecy list. Several ML frameworks, such as
@@ -57,15 +49,6 @@ flags.DEFINE_string('wind_vector_name', 'flow_velocity.json',
 flags.DEFINE_string(
     'output_dir', None,
     'Path to the folder where the processed data will be saved.')
-
-flags.DEFINE_string('nodes_name', 'nodes.npy',
-                    'Name of the file containing the nodes.')
-flags.DEFINE_string('edges_name', 'edges.npy',
-                    'Name of the file containing the edges.')
-flags.DEFINE_string('save_wind_vector_name', 'flow_velocity.npy',
-                    'Name of the file containing the flow velocity.')
-flags.DEFINE_string('wind_pressures_name', 'wind_pressures.npy',
-                    'Name of the file containing the wind pressures.')
 
 flags.DEFINE_float('tolerance', 1.5, 'Tolerance for the mesh sampling.')
 
@@ -109,8 +92,7 @@ def load_flow_velocity(flow_velocity_path):
 
 
 def process_folder(folder, openfoam_pressure_field_name, original_mesh_name,
-                   wind_vector_name, tolerance, output_dir, nodes_name,
-                   edges_name, save_wind_vector_name, wind_pressures_name):
+                   wind_vector_name, tolerance, output_dir):
     """Processes a single folder."""
     openfoam_mesh_path = os.path.join(folder, openfoam_pressure_field_name)
     original_mesh_path = os.path.join(folder, original_mesh_name)
@@ -126,16 +108,19 @@ def process_folder(folder, openfoam_pressure_field_name, original_mesh_name,
     if os.path.exists(wind_vector_path):
         wind_vector = load_flow_velocity(wind_vector_path)
 
-    # Save the data.
-    save_dir = os.path.join(output_dir, os.path.basename(folder))
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    np.save(os.path.join(save_dir, nodes_name), nodes)
-    np.save(os.path.join(save_dir, edges_name), edge_list)
-    np.save(os.path.join(save_dir, wind_pressures_name), pressures)
-
+    # Save the data to the output_dir in json format.
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    save_path = os.path.join(output_dir, os.path.basename(folder) + '.json')
+    data = {
+        'nodes': nodes.tolist(),
+        'edges': edge_list.tolist(),
+        'wind_pressures': pressures.tolist()
+    }
     if os.path.exists(wind_vector_path):
-        np.save(os.path.join(save_dir, save_wind_vector_name), wind_vector)
+        data['wind_vector'] = wind_vector.tolist()
+    with open(save_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
 
 
 def main(_):
@@ -154,9 +139,7 @@ def main(_):
     for folder in sim_folders:
         process_folder(folder, FLAGS.openfoam_pressure_field_name,
                        FLAGS.original_mesh_name, FLAGS.wind_vector_name,
-                       FLAGS.tolerance, FLAGS.output_dir, FLAGS.nodes_name,
-                       FLAGS.edges_name, FLAGS.save_wind_vector_name,
-                       FLAGS.wind_pressures_name)
+                       FLAGS.tolerance, FLAGS.output_dir)
 
 
 if __name__ == '__main__':

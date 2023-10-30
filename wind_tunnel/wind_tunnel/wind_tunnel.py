@@ -6,42 +6,34 @@ assumes that the data is stored on the google cloud bucket
 can be stored in zip format. For example:
 
 https://storage.googleapis.com/wind_tunnel/
-├── v0.1.zip
-├── v0.2.zip
-└── v0.3.zip
+├── v0.1.tar.gz
+├── v0.2.tar.gz
+└── v0.3.tar.gz
 
 Each zip file should have the structure:
 
-v0.1.zip
-└── v0.1
-    ├── 102042348
-    │   ├── edges.npy
-    │   ├── nodes.npy
-    │   ├── wind_pressures.npy
-    │   └── wind_velocities.npy
-    ├── 102042349
-    │   ├── edges.npy
-    │   ├── nodes.npy
-    │   ├── wind_pressures.npy
-    │   └── wind_velocities.npy
-    ├── 102042350
-    │   ├── edges.npy
-    │   ├── nodes.npy
-    │   ├── wind_pressures.npy
-    │   └── wind_velocities.npy
+v0.1.tar.gz
+├── 102042348.json
+├── 102042349.json
+└── 102042350.json
 
-Where each subdirectory corresponds to a different simulation.
+Where each json file corresponds to a different simulation. The json
+file should have the following structure:
 
-To load the data, use the following code:
+{
+    "nodes": list with shape (N, 3) and dtype float32,
+    "edges": list with shape (M, 2) and dtype int32,
+    "wind_vector": list with shape (3,) and dtype float32,
+    "wind_pressures": list with shape (N,) and dtype float32
+}
 
 from datasets import load_dataset
 dataset = load_dataset('wind_tunnel', 'v0.1')
 
 '''
-import os
+import json
 
 import datasets
-import numpy as np
 
 _DESCRIPTION = 'Wind tunnel dataset example.'
 
@@ -61,7 +53,7 @@ class WindTunnel(datasets.GeneratorBasedBuilder):
         '''
         super().__init__(**kwargs)
         self.version = version
-        self.bucket_url = _BASE_URL + f'{version}.zip'
+        self.bucket_url = _BASE_URL + f'{version}.tar.gz'
 
     def _info(self):
         return datasets.DatasetInfo(
@@ -69,47 +61,34 @@ class WindTunnel(datasets.GeneratorBasedBuilder):
             features=datasets.Features({
                 'nodes': datasets.Array2D((None, 3), dtype='float32'),
                 'edges': datasets.Array2D((None, 2), dtype='int32'),
-                'flow_velocity': [datasets.Value('float32')],
+                'wind_vector': [datasets.Value('float32')],
                 'wind_pressures': [datasets.Value('float32')]
             }))
 
     def _split_generators(self, dl_manager):
         # Download and extract the zip file in the bucket.
-        print(self.bucket_url)
-        downloaded_dir = dl_manager.download_and_extract(self.bucket_url)
-
-        dirs = [
-            os.path.join(downloaded_dir, self.version, dir_)
-            for dir_ in os.listdir(os.path.join(downloaded_dir, self.version))
-        ]
+        downloaded_dir = dl_manager.download(self.bucket_url)
 
         return [
-            datasets.SplitGenerator(name=datasets.Split.TRAIN,
-                                    gen_kwargs={'sim_dir_paths': dirs})
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={
+                    'sim_dir_paths': dl_manager.iter_archive(downloaded_dir)
+                })
         ]
 
     # pylint: disable=arguments-differ
     def _generate_examples(self, sim_dir_paths):
-        for id_, sim_dir_path in enumerate(sim_dir_paths):
-            nodes = np.load(os.path.join(sim_dir_path, 'nodes.npy'))
-            edges = np.load(os.path.join(sim_dir_path, 'edges.npy'))
-            wind_pressures = np.load(
-                os.path.join(sim_dir_path, 'wind_pressures.npy'))
-
-            flow_velocity_path = os.path.join(sim_dir_path,
-                                              'flow_velocities.npy')
-            # TODO(augusto): This is only here to provide legacy
-            # supports for datasets that were previously generated
-            # with constant velocities. It will be removed once they
-            # are generated again.
-            if os.path.exists(flow_velocity_path):
-                flow_velocity = np.load(flow_velocity_path)
-            else:
-                flow_velocity = _DEFAULT_FLOW_VELOCITY
-
+        for id_, (_, sim_obj) in enumerate(sim_dir_paths):
+            bytes_data = sim_obj.read()
+            json_data = json.loads(bytes_data)
+            nodes = json_data['nodes']
+            edges = json_data['edges']
+            wind_pressures = json_data['wind_pressures']
+            wind_vector = json_data['wind_vector']
             yield id_, {
                 'nodes': nodes,
                 'edges': edges,
-                'flow_velocity': flow_velocity,
-                'wind_pressures': wind_pressures,
+                'wind_vector': wind_vector,
+                'wind_pressures': wind_pressures
             }
