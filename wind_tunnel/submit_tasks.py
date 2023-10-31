@@ -31,7 +31,7 @@ flags.DEFINE_enum("resolution", "low", ["low", "medium", "high"],
 flags.DEFINE_string("machine_type", "c2-standard-16", "Machine type.")
 flags.DEFINE_integer("num_machines", 1, "Number of machines.")
 flags.DEFINE_integer("disk_size_gb", 60, "Disk size in GB.")
-flags.DEFINE_boolean("elastic_machine_group", False,
+flags.DEFINE_boolean("elastic_machine_group", True,
                      "Whether to use an elastic machine group.")
 
 flags.DEFINE_string("output_dataset", None, "Path to the output dataset.")
