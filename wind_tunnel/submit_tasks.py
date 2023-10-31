@@ -21,6 +21,8 @@ flags.DEFINE_list("flow_velocity_range_y", None,
                   "Range of flow velocity in the y-direction.")
 flags.DEFINE_list("flow_velocity_range_z", None,
                   "Range of flow velocity in the z-direction.")
+flags.DEFINE_integer("num_simulations_per_object", 1,
+                     "Number of simulations to run for each object.")
 flags.DEFINE_list("x_geometry", [-5, 20], "X geometry of the domain.")
 flags.DEFINE_list("y_geometry", [-5, 5], "Y geometry of the domain.")
 flags.DEFINE_list("z_geometry", [-2, 10], "Z geometry of the domain.")
@@ -71,6 +73,25 @@ def make_machine_group(machine_type, num_machines, disk_size_gb,
                                             disk_size_gb=disk_size_gb)
 
 
+def copy_obj_files_and_metadata_to_output(obj_task_velocities, output_dataset):
+    """Copy the obj files and metadata to the output dataset.
+
+    Args:
+        obj_task_velocities: List of tuples (object_path, task, flow_velocity).
+        output_dataset: Path to the output dataset.
+    """
+    for object_path, task, flow_velocity in obj_task_velocities:
+        os.makedirs(os.path.join(output_dataset, task.id))
+        shutil.copy(object_path,
+                    os.path.join(output_dataset, task.id, "object.obj"))
+
+        # Save the flow velocity with the simulation.
+        with open(os.path.join(output_dataset, task.id, "flow_velocity.json"),
+                  "w",
+                  encoding="utf-8") as f:
+            json.dump(flow_velocity, f)
+
+
 def main(_):
     object_paths = [
         os.path.join(FLAGS.input_dataset, path)
@@ -95,35 +116,23 @@ def main(_):
 
         obj_task_velocities = []
         for object_path in object_paths:
-            flow_velocity_x = random.uniform(*flow_velocity_range_x)
-            flow_velocity_y = random.uniform(*flow_velocity_range_y)
-            flow_velocity_z = random.uniform(*flow_velocity_range_z)
+            for _ in range(FLAGS.num_simulations_per_object):
+                flow_velocity_x = random.uniform(*flow_velocity_range_x)
+                flow_velocity_y = random.uniform(*flow_velocity_range_y)
+                flow_velocity_z = random.uniform(*flow_velocity_range_z)
 
-            task = simulate_wind_tunnel_scenario(
-                object_path,
-                [flow_velocity_x, flow_velocity_y, flow_velocity_z], x_geometry,
-                y_geometry, z_geometry, FLAGS.num_iterations, machine_group,
-                FLAGS.resolution)
+                task = simulate_wind_tunnel_scenario(
+                    object_path,
+                    [flow_velocity_x, flow_velocity_y, flow_velocity_z],
+                    x_geometry, y_geometry, z_geometry, FLAGS.num_iterations,
+                    machine_group, FLAGS.resolution)
 
-            obj_task_velocities.append(
-                (object_path, task,
-                 [flow_velocity_x, flow_velocity_y, flow_velocity_z]))
+                obj_task_velocities.append(
+                    (object_path, task,
+                     [flow_velocity_x, flow_velocity_y, flow_velocity_z]))
 
-        # Copy the object files to a folder with path
-        # FLAGS.output_dataset/task_id. This keeps track of the obj file
-        # for the given file.
-        for object_path, task, flow_velocity in obj_task_velocities:
-            os.makedirs(os.path.join(FLAGS.output_dataset, task.id))
-            shutil.copy(
-                object_path,
-                os.path.join(FLAGS.output_dataset, task.id, "object.obj"))
-
-            # Save the flow velocity with the simulation.
-            with open(os.path.join(FLAGS.output_dataset, task.id,
-                                   "flow_velocity.json"),
-                      "w",
-                      encoding="utf-8") as f:
-                json.dump(flow_velocity, f)
+        copy_obj_files_and_metadata_to_output(obj_task_velocities,
+                                              FLAGS.output_dataset)
 
         # Make a json with the task ids and the machine group name.
         with open(os.path.join(FLAGS.output_dataset, "sim_info.json"),
