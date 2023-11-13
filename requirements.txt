@@ -4,3 +4,4 @@ pyvista
 datasets
 pytest
 gcsfs
+pyarrow==13.0.0
