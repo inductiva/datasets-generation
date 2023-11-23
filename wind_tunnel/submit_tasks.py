@@ -25,7 +25,7 @@ flags.DEFINE_integer("num_simulations_per_object", 1,
                      "Number of simulations to run for each object.")
 flags.DEFINE_list("x_geometry", [-5, 20], "X geometry of the domain.")
 flags.DEFINE_list("y_geometry", [-5, 5], "Y geometry of the domain.")
-flags.DEFINE_list("z_geometry", [-2, 10], "Z geometry of the domain.")
+flags.DEFINE_list("z_geometry", [0, 8], "Z geometry of the domain.")
 flags.DEFINE_integer("num_iterations", 100, "Number of iterations to run.")
 flags.DEFINE_enum("resolution", "low", ["low", "medium", "high"],
                   "Resolution of the OpenFOAM meshes.")
