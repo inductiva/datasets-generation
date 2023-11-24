@@ -1,4 +1,8 @@
-"""Dataset for the fluid cube"""
+"""Dataset for the fluid cube
+
+More on: https://inductiva.ai/blog/article/fluid-cube-dataset
+
+"""
 import json
 
 import datasets
