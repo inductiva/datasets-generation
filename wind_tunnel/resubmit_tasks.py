@@ -47,7 +47,7 @@ import utils
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string('path_to_sim_info', None, 'Path to simulation info')
+flags.DEFINE_string("path_to_sim_info", None, "Path to simulation info")
 
 
 def get_failed_tasks(task_ids):
