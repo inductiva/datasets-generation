@@ -35,6 +35,8 @@ from absl import logging
 
 import utils
 
+import inductiva
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string("path_to_sim_info", None,
@@ -54,15 +56,16 @@ def main(_):
 
     logging.info("Number of tasks: %s", len(task_ids))
 
-    tasks_successfully_completed = utils.get_successfull_tasks(task_ids)
+    tasks_ids_successfully_completed = utils.get_successfull_tasks(task_ids)
     logging.info("Tasks successfully completed: %s",
-                 len(tasks_successfully_completed))
+                 len(tasks_ids_successfully_completed))
 
     download_dir = os.path.dirname(FLAGS.path_to_sim_info)
-    for task in tasks_successfully_completed:
-        save_path = os.path.join(download_dir, task.id)
+    for task_id in tasks_ids_successfully_completed:
+        save_path = os.path.join(download_dir, task_id)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
+        task = inductiva.tasks.Task(task_id)
         task.download_outputs(FLAGS.files_to_download, output_dir=save_path)
 
 

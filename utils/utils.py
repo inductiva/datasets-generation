@@ -3,11 +3,11 @@ import inductiva
 
 
 def get_successfull_tasks(task_ids):
-    """Gets the tasks that were successfully completed"""
+    """Gets the tasks ids that were successfully completed"""
     successfull_tasks = []
     for task_id in task_ids:
         task = inductiva.tasks.Task(task_id)
         status = task.get_status()
         if status == "success":
-            successfull_tasks.append(task)
+            successfull_tasks.append(task_id)
     return successfull_tasks
