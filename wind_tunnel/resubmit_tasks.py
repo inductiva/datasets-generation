@@ -71,11 +71,7 @@ def delete_from_disk_failed_tasks(parent_dir, task_ids):
 
 def remove_from_list_failed_task_ids(task_ids, failed_task_ids):
     """Removes failed tasks from list of task ids"""
-    new_task_ids = []
-    for task_id in task_ids:
-        if task_id not in failed_task_ids:
-            new_task_ids.append(task_id)
-    return new_task_ids
+    return list(set(task_ids) - set(failed_task_ids))
 
 
 def rewrite_json_file(path_to_json, failed_task_ids, new_tasks_ids):
