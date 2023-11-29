@@ -1,15 +1,13 @@
 """This file uses the inductiva API to sumbit tasks"""
 import os
-import shutil
 import json
+import random
 
 from absl import app
 from absl import flags
 from absl import logging
 
-import random
-
-import inductiva
+import utils
 
 FLAGS = flags.FLAGS
 
@@ -45,53 +43,6 @@ flags.mark_flag_as_required("flow_velocity_range_y")
 flags.mark_flag_as_required("flow_velocity_range_z")
 
 
-def simulate_wind_tunnel_scenario(obj_path, flow_velocity, x_geometry,
-                                  y_geometry, z_geometry, num_iterations,
-                                  machine_group, resolution):
-    domain_geometry = {"x": x_geometry, "y": y_geometry, "z": z_geometry}
-
-    scenario = inductiva.fluids.WindTunnel(flow_velocity=flow_velocity,
-                                           domain=domain_geometry)
-
-    task = scenario.simulate(object_path=obj_path,
-                             num_iterations=num_iterations,
-                             resolution=resolution,
-                             machine_group=machine_group)
-    return task
-
-
-def make_machine_group(machine_type, num_machines, disk_size_gb,
-                       elastic_machine_group):
-    if elastic_machine_group:
-        return inductiva.resources.ElasticMachineGroup(
-            machine_type=machine_type,
-            min_machines=1,
-            max_machines=num_machines,
-            disk_size_gb=disk_size_gb)
-    return inductiva.resources.MachineGroup(machine_type=machine_type,
-                                            num_machines=num_machines,
-                                            disk_size_gb=disk_size_gb)
-
-
-def copy_obj_files_and_metadata_to_output(obj_task_velocities, output_dataset):
-    """Copy the obj files and metadata to the output dataset.
-
-    Args:
-        obj_task_velocities: List of tuples (object_path, task, flow_velocity).
-        output_dataset: Path to the output dataset.
-    """
-    for object_path, task, flow_velocity in obj_task_velocities:
-        os.makedirs(os.path.join(output_dataset, task.id))
-        shutil.copy(object_path,
-                    os.path.join(output_dataset, task.id, "object.obj"))
-
-        # Save the flow velocity with the simulation.
-        with open(os.path.join(output_dataset, task.id, "flow_velocity.json"),
-                  "w",
-                  encoding="utf-8") as f:
-            json.dump(flow_velocity, f)
-
-
 def main(_):
     object_paths = [
         os.path.join(FLAGS.input_dataset, path)
@@ -108,10 +59,10 @@ def main(_):
 
     try:
         # Start the machine group with the requested parameters
-        machine_group = make_machine_group(FLAGS.machine_type,
-                                           FLAGS.num_machines,
-                                           FLAGS.disk_size_gb,
-                                           FLAGS.elastic_machine_group)
+        machine_group = utils.make_machine_group(FLAGS.machine_type,
+                                                 FLAGS.num_machines,
+                                                 FLAGS.disk_size_gb,
+                                                 FLAGS.elastic_machine_group)
         machine_group.start()
 
         obj_task_velocities = []
@@ -121,7 +72,7 @@ def main(_):
                 flow_velocity_y = random.uniform(*flow_velocity_range_y)
                 flow_velocity_z = random.uniform(*flow_velocity_range_z)
 
-                task = simulate_wind_tunnel_scenario(
+                task = utils.simulate_wind_tunnel_scenario(
                     object_path,
                     [flow_velocity_x, flow_velocity_y, flow_velocity_z],
                     x_geometry, y_geometry, z_geometry, FLAGS.num_iterations,
@@ -131,8 +82,8 @@ def main(_):
                     (object_path, task,
                      [flow_velocity_x, flow_velocity_y, flow_velocity_z]))
 
-        copy_obj_files_and_metadata_to_output(obj_task_velocities,
-                                              FLAGS.output_dataset)
+        utils.copy_obj_files_and_metadata_to_output(obj_task_velocities,
+                                                    FLAGS.output_dataset)
 
         # Make a json with the task ids and the machine group name.
         with open(os.path.join(FLAGS.output_dataset, "sim_info.json"),
@@ -143,7 +94,13 @@ def main(_):
                 "machine_group": machine_group.name,
                 "machine_group_machine_type": FLAGS.machine_type,
                 "machine_group_num_machines": FLAGS.num_machines,
-                "machine_group_disk_size_gb": FLAGS.disk_size_gb
+                "machine_group_disk_size_gb": FLAGS.disk_size_gb,
+                "machine_group_elastic": FLAGS.elastic_machine_group,
+                "num_iterations": FLAGS.num_iterations,
+                "x_geometry": x_geometry,
+                "y_geometry": y_geometry,
+                "z_geometry": z_geometry,
+                "resolution": FLAGS.resolution
             }
             json.dump(dict_to_save, f)
 
