@@ -63,8 +63,6 @@ def main(_):
     download_dir = os.path.dirname(FLAGS.path_to_sim_info)
     for task_id in tasks_ids_successfully_completed:
         save_path = os.path.join(download_dir, task_id)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
         task = inductiva.tasks.Task(task_id)
         task.download_outputs(FLAGS.files_to_download, output_dir=save_path)
 
