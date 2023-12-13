@@ -47,12 +47,15 @@ flags.mark_flag_as_required("flow_velocity_range_y")
 flags.mark_flag_as_required("flow_velocity_range_z")
 
 
-def make_velocities(vel_range, num_simulations, iterative):
+def make_velocities(vel_range_x, vel_range_y, vel_range_z, num_simulations,
+                    iterative):
     if iterative:
-        return np.linspace(*vel_range, num_simulations)
-    return np.random.uniform(low=vel_range[0],
-                             high=vel_range[1],
-                             size=(num_simulations,))
+        return (np.linspace(*vel_range, num_simulations)
+                for vel_range in [vel_range_x, vel_range_y, vel_range_z])
+    return (np.random.uniform(low=vel_range[0],
+                              high=vel_range[1],
+                              size=(num_simulations,))
+            for vel_range in [vel_range_x, vel_range_y, vel_range_z])
 
 
 def main(_):
@@ -79,17 +82,13 @@ def main(_):
 
         obj_task_velocities = []
         for object_path in object_paths:
-            flow_velocities_x = make_velocities(
-                flow_velocity_range_x, FLAGS.num_simulations_per_object,
-                FLAGS.iterative_velocity)
-            flow_velocities_y = make_velocities(
-                flow_velocity_range_y, FLAGS.num_simulations_per_object,
-                FLAGS.iterative_velocity)
-            flow_velocities_z = make_velocities(
-                flow_velocity_range_z, FLAGS.num_simulations_per_object,
-                FLAGS.iterative_velocity)
+            velocities = make_velocities(flow_velocity_range_x,
+                                         flow_velocity_range_y,
+                                         flow_velocity_range_z,
+                                         FLAGS.num_simulations_per_object,
+                                         FLAGS.iterative_velocity)
             for flow_velocity_x, flow_velocity_y, flow_velocity_z in zip(
-                    flow_velocities_x, flow_velocities_y, flow_velocities_z):
+                    *velocities):
                 task = utils.simulate_wind_tunnel_scenario(
                     object_path,
                     [flow_velocity_x, flow_velocity_y, flow_velocity_z],
