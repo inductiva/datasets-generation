@@ -1,7 +1,6 @@
 """This file uses the inductiva API to sumbit tasks"""
 import os
 import json
-import random
 
 from absl import app
 from absl import flags
