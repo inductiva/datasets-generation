@@ -51,7 +51,9 @@ flags.mark_flag_as_required("flow_velocity_range_z")
 def make_velocities(vel_range, num_simulations, iterative):
     if iterative:
         return np.linspace(*vel_range, num_simulations)
-    return [random.uniform(*vel_range) for _ in range(num_simulations)]
+    return np.random.uniform(low=vel_range[0],
+                             high=vel_range[1],
+                             size=(num_simulations,))
 
 
 def main(_):
