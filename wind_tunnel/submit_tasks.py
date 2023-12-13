@@ -23,7 +23,7 @@ flags.DEFINE_list("flow_velocity_range_z", None,
 flags.DEFINE_integer("num_simulations_per_object", 1,
                      "Number of simulations to run for each object.")
 flags.DEFINE_boolean(
-    "iterative_velocity", False,
+    "random_velocity", False,
     "Split the velocity range into num_simulations_per_object.")
 flags.DEFINE_list("x_geometry", [-5, 20], "X geometry of the domain.")
 flags.DEFINE_list("y_geometry", [-5, 5], "Y geometry of the domain.")
@@ -48,14 +48,11 @@ flags.mark_flag_as_required("flow_velocity_range_z")
 
 
 def make_velocities(vel_range_x, vel_range_y, vel_range_z, num_simulations,
-                    iterative):
-    if iterative:
-        return (np.linspace(*vel_range, num_simulations)
-                for vel_range in [vel_range_x, vel_range_y, vel_range_z])
-    return (np.random.uniform(low=vel_range[0],
-                              high=vel_range[1],
-                              size=(num_simulations,))
-            for vel_range in [vel_range_x, vel_range_y, vel_range_z])
+                    random):
+    generator = np.random.uniform if random else np.linspace
+    return np.c_[generator(vel_range_x[0], vel_range_x[1], num_simulations),
+                 generator(vel_range_y[0], vel_range_y[1], num_simulations),
+                 generator(vel_range_z[0], vel_range_z[1], num_simulations)]
 
 
 def main(_):
@@ -86,18 +83,13 @@ def main(_):
                                          flow_velocity_range_y,
                                          flow_velocity_range_z,
                                          FLAGS.num_simulations_per_object,
-                                         FLAGS.iterative_velocity)
-            for flow_velocity_x, flow_velocity_y, flow_velocity_z in zip(
-                    *velocities):
+                                         FLAGS.random_velocity)
+            for vel in velocities:
                 task = utils.simulate_wind_tunnel_scenario(
-                    object_path,
-                    [flow_velocity_x, flow_velocity_y, flow_velocity_z],
-                    x_geometry, y_geometry, z_geometry, FLAGS.num_iterations,
-                    machine_group, FLAGS.resolution)
+                    object_path, vel, x_geometry, y_geometry, z_geometry,
+                    FLAGS.num_iterations, machine_group, FLAGS.resolution)
 
-                obj_task_velocities.append(
-                    (object_path, task,
-                     [flow_velocity_x, flow_velocity_y, flow_velocity_z]))
+                obj_task_velocities.append((object_path, task, vel))
 
         utils.copy_obj_files_and_metadata_to_output(obj_task_velocities,
                                                     FLAGS.output_dataset)
