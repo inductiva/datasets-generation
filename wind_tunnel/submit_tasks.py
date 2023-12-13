@@ -7,6 +7,8 @@ from absl import app
 from absl import flags
 from absl import logging
 
+import numpy as np
+
 import utils
 
 FLAGS = flags.FLAGS
@@ -21,6 +23,9 @@ flags.DEFINE_list("flow_velocity_range_z", None,
                   "Range of flow velocity in the z-direction.")
 flags.DEFINE_integer("num_simulations_per_object", 1,
                      "Number of simulations to run for each object.")
+flags.DEFINE_boolean(
+    "iterative_velocity", False,
+    "Split the velocity range into num_simulations_per_object.")
 flags.DEFINE_list("x_geometry", [-5, 20], "X geometry of the domain.")
 flags.DEFINE_list("y_geometry", [-5, 5], "Y geometry of the domain.")
 flags.DEFINE_list("z_geometry", [0, 8], "Z geometry of the domain.")
@@ -41,6 +46,12 @@ flags.mark_flag_as_required("output_dataset")
 flags.mark_flag_as_required("flow_velocity_range_x")
 flags.mark_flag_as_required("flow_velocity_range_y")
 flags.mark_flag_as_required("flow_velocity_range_z")
+
+
+def make_velocities(vel_range, num_simulations, iterative):
+    if iterative:
+        return np.linspace(*vel_range, num_simulations)
+    return [random.uniform(*vel_range) for _ in range(num_simulations)]
 
 
 def main(_):
@@ -67,11 +78,17 @@ def main(_):
 
         obj_task_velocities = []
         for object_path in object_paths:
-            for _ in range(FLAGS.num_simulations_per_object):
-                flow_velocity_x = random.uniform(*flow_velocity_range_x)
-                flow_velocity_y = random.uniform(*flow_velocity_range_y)
-                flow_velocity_z = random.uniform(*flow_velocity_range_z)
-
+            flow_velocities_x = make_velocities(
+                flow_velocity_range_x, FLAGS.num_simulations_per_object,
+                FLAGS.iterative_velocity)
+            flow_velocities_y = make_velocities(
+                flow_velocity_range_y, FLAGS.num_simulations_per_object,
+                FLAGS.iterative_velocity)
+            flow_velocities_z = make_velocities(
+                flow_velocity_range_z, FLAGS.num_simulations_per_object,
+                FLAGS.iterative_velocity)
+            for flow_velocity_x, flow_velocity_y, flow_velocity_z in zip(
+                    flow_velocities_x, flow_velocities_y, flow_velocities_z):
                 task = utils.simulate_wind_tunnel_scenario(
                     object_path,
                     [flow_velocity_x, flow_velocity_y, flow_velocity_z],
