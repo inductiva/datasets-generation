@@ -89,7 +89,7 @@ def main(_):
                     object_path, vel, x_geometry, y_geometry, z_geometry,
                     FLAGS.num_iterations, machine_group, FLAGS.resolution)
 
-                obj_task_velocities.append((object_path, task, vel))
+                obj_task_velocities.append((object_path, task, vel.tolist()))
 
         utils.copy_obj_files_and_metadata_to_output(obj_task_velocities,
                                                     FLAGS.output_dataset)
