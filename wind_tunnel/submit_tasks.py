@@ -1,11 +1,12 @@
 """This file uses the inductiva API to sumbit tasks"""
 import os
 import json
-import random
 
 from absl import app
 from absl import flags
 from absl import logging
+
+import numpy as np
 
 import utils
 
@@ -21,6 +22,9 @@ flags.DEFINE_list("flow_velocity_range_z", None,
                   "Range of flow velocity in the z-direction.")
 flags.DEFINE_integer("num_simulations_per_object", 1,
                      "Number of simulations to run for each object.")
+flags.DEFINE_boolean(
+    "random_velocity", False,
+    "Split the velocity range into num_simulations_per_object.")
 flags.DEFINE_list("x_geometry", [-5, 20], "X geometry of the domain.")
 flags.DEFINE_list("y_geometry", [-5, 5], "Y geometry of the domain.")
 flags.DEFINE_list("z_geometry", [0, 8], "Z geometry of the domain.")
@@ -41,6 +45,14 @@ flags.mark_flag_as_required("output_dataset")
 flags.mark_flag_as_required("flow_velocity_range_x")
 flags.mark_flag_as_required("flow_velocity_range_y")
 flags.mark_flag_as_required("flow_velocity_range_z")
+
+
+def make_velocities(vel_range_x, vel_range_y, vel_range_z, num_simulations,
+                    random):
+    generator = np.random.uniform if random else np.linspace
+    return np.c_[generator(vel_range_x[0], vel_range_x[1], num_simulations),
+                 generator(vel_range_y[0], vel_range_y[1], num_simulations),
+                 generator(vel_range_z[0], vel_range_z[1], num_simulations)]
 
 
 def main(_):
@@ -67,20 +79,17 @@ def main(_):
 
         obj_task_velocities = []
         for object_path in object_paths:
-            for _ in range(FLAGS.num_simulations_per_object):
-                flow_velocity_x = random.uniform(*flow_velocity_range_x)
-                flow_velocity_y = random.uniform(*flow_velocity_range_y)
-                flow_velocity_z = random.uniform(*flow_velocity_range_z)
-
+            velocities = make_velocities(flow_velocity_range_x,
+                                         flow_velocity_range_y,
+                                         flow_velocity_range_z,
+                                         FLAGS.num_simulations_per_object,
+                                         FLAGS.random_velocity)
+            for vel in velocities:
                 task = utils.simulate_wind_tunnel_scenario(
-                    object_path,
-                    [flow_velocity_x, flow_velocity_y, flow_velocity_z],
-                    x_geometry, y_geometry, z_geometry, FLAGS.num_iterations,
-                    machine_group, FLAGS.resolution)
+                    object_path, vel, x_geometry, y_geometry, z_geometry,
+                    FLAGS.num_iterations, machine_group, FLAGS.resolution)
 
-                obj_task_velocities.append(
-                    (object_path, task,
-                     [flow_velocity_x, flow_velocity_y, flow_velocity_z]))
+                obj_task_velocities.append((object_path, task, vel))
 
         utils.copy_obj_files_and_metadata_to_output(obj_task_velocities,
                                                     FLAGS.output_dataset)
