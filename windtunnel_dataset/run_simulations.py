@@ -14,13 +14,11 @@ flags.DEFINE_integer('NUM_ITERATIONS', 300, 'Number of iterations')
 flags.DEFINE_integer('RESOLUTION', 5, 'Resolution')
 
 flags.DEFINE_string('MACHINE_GROUP_NAME', None, 'Machine group name')
-flags.DEFINE_string('SUBMISSIONS_FILE', 'data/submissions/submissions.jsonl',
+flags.DEFINE_string('SUBMISSIONS_FILE', 'data/submissions.jsonl',
                     'Submissions file')
-flags.DEFINE_string('PARAMS_FILE', 'params.json', 'Parameters file')
+flags.DEFINE_string('PARAMS_FILE', 'data/params.json', 'Parameters file')
 
 flags.DEFINE_boolean('DEBUG', False, 'Debug mode')
-
-os.makedirs(os.path.dirname(FLAGS.SUBMISSIONS_FILE), exist_ok=True)
 
 
 def load_parameters():

@@ -17,7 +17,7 @@ flags.DEFINE_integer('MAX_WIND_SPEED', 50, 'Maximum wind speed')
 flags.DEFINE_string('OBJ_DIR',
                     'data/output/instant-mesh-large/meshes_processed',
                     'Object directory')
-flags.DEFINE_string('PARAMS_FILE', 'params.json', 'Parameters file')
+flags.DEFINE_string('PARAMS_FILE', 'data/params.json', 'Parameters file')
 
 
 def generate_parameters():
