@@ -1,8 +1,10 @@
-import pyvista as pv
-import vtk
-import trimesh
-from vtk.util import numpy_support
+""" This module contains functions to preprocess 3D meshes. """
+
 import numpy as np
+import pyvista as pv
+import trimesh
+import vtk
+from vtk.util import numpy_support
 
 
 def _extract_largest_connected_region(mesh):
@@ -10,7 +12,7 @@ def _extract_largest_connected_region(mesh):
     Extract and return the largest connected region from the given mesh.
 
     This function performs the following steps:
-    1. Applies a connectivity filter to identify and color all connected regions in the surface.
+    1. Applies a connectivity filter to identify and color all connected regions
     2. Identifies the largest connected region based on the number of cells.
     3. Extracts the largest connected region from the mesh.
     4. Returns the largest connected region as a new mesh object.
@@ -32,7 +34,7 @@ def _extract_largest_connected_region(mesh):
     regions = connectivity_filter.GetOutput()
 
     region_ids = numpy_support.vtk_to_numpy(
-        regions.GetCellData().GetArray("RegionId"))
+        regions.GetCellData().GetArray('RegionId'))
 
     unique_region_ids, counts = np.unique(region_ids, return_counts=True)
 
@@ -53,10 +55,13 @@ def _align_mesh_to_principal_axes(mesh):
     Align the given mesh to its principal axes.
 
     This function performs the following steps:
-    1. Calculates the centroid of the mesh points and centers the points around the centroid.
+    1. Calculates the centroid of the mesh points and centers the points around
+       the centroid.
     2. Computes the covariance matrix of the centered points.
-    3. Performs an eigen decomposition of the covariance matrix to find the principal axes.
-    4. Constructs a transformation matrix to align the mesh with its principal axes.
+    3. Performs an eigen decomposition of the covariance matrix to find the
+       principal axes.
+    4. Constructs a transformation matrix to align the mesh with its principal
+       axes.
     5. Applies the transformation to the mesh and returns the aligned mesh.
 
     Parameters:
@@ -91,10 +96,11 @@ def _align_mesh_to_principal_axes(mesh):
 
 def preprocess_mesh(obj_path, save_path):
     """
-    Extracts the largest connected region and aligns the mesh to the principal axes
+    Extracts the largest connected region and aligns the mesh
+        to the principal axes
     """
     mesh = pv.read(obj_path)
-            
+
     mesh = _extract_largest_connected_region(mesh)
 
     mesh = mesh.rotate_y(180)
