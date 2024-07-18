@@ -7,7 +7,8 @@ def test_shapes_of_examples():
     dataset = datasets.load_dataset('./legacy_datasets/fluid_cube/fluid_cube',
                                     version='10_simulations',
                                     split='train',
-                                    streaming=True)
+                                    streaming=True,
+                                    trust_remote_code=True)
     for example in dataset:
         simulation_time_steps = example['simulation_time_steps']
         first_time_step = simulation_time_steps[0]
