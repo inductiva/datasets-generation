@@ -37,15 +37,17 @@ def run_simulations(params):
             'num_iterations': FLAGS.NUM_ITERATIONS,
             'resolution': FLAGS.RESOLUTION,
         }
+        wind_tunnel.set_object(object_path=param['object_path'],
+                               rotate_z_degrees=data['rotate_angle'])
+
+        if FLAGS.DEBUG:
+            wind_tunnel.display()
 
         submission_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        task = wind_tunnel.simulate(object_path=param['object_path'],
-                                    wind_speed_ms=data['wind_speed'],
-                                    rotate_z_degrees=data['rotate_angle'],
+        task = wind_tunnel.simulate(wind_speed_ms=data['wind_speed'],
                                     num_iterations=data['num_iterations'],
                                     resolution=data['resolution'],
-                                    display=FLAGS.DEBUG,
                                     machine_group_name=FLAGS.MACHINE_GROUP_NAME)
 
         task_data = {
