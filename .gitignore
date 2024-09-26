@@ -2,6 +2,14 @@
 # use at Inductiva. Based on the .gitignore templates from:
 # https://github.com/github/gitignore
 
+data/
+!data/.gitkeep
+!data/cars196/.gitkeep
+!data/output/.gitkeep
+!data/submissions/.gitkeep
+inductiva_input/
+inductiva_output/
+
 #################
 ### JetBrains ###
 #################

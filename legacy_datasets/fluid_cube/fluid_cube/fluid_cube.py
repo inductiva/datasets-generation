@@ -13,7 +13,7 @@ _DESCRIPTION = 'https://inductiva.ai/blog/article/fluid-cube-dataset'
 _BASE_URL = 'https://storage.googleapis.com/fluid_cube/'
 
 
-class WindTunnel(datasets.GeneratorBasedBuilder):
+class FluidCube(datasets.GeneratorBasedBuilder):
     '''The FluidCube builder'''
 
     def __init__(self, version, **kwargs):

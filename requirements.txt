@@ -1,7 +1,2 @@
-absl-py
-inductiva
-pyvista
+git+https://github.com/inductiva/wind-tunnel.git
 datasets
-pytest
-gcsfs
-pyarrow==13.0.0
