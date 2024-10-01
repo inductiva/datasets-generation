@@ -52,35 +52,6 @@ def postprocess_tasks(tasks_file):
             break
 
 
-def get_simulation_metadata(
-    task_metadata,
-    coeff,
-    input_mesh_path,
-    openfoam_mesh_path,
-    pressure_field_mesh_path,
-    streamlines_mesh_path,
-):
-    object_file = task_metadata.get("object_file").replace("image", "object")
-    simulation_metadata = {
-        "id": task_metadata.get("task_id"),
-        "object_file": object_file,
-        "wind_speed": task_metadata.get("wind_speed"),
-        "rotate_angle": task_metadata.get("rotate_angle"),
-        "num_iterations": task_metadata.get("num_iterations"),
-        "resolution": task_metadata.get("resolution"),
-        "drag_coefficient": coeff.get("Drag"),
-        "moment_coefficient": coeff.get("Moment"),
-        "lift_coefficient": coeff.get("Lift"),
-        "front_lift_coefficient": coeff.get("Front Lift"),
-        "rear_lift_coefficient": coeff.get("Rear Lift"),
-        "input_mesh_path": input_mesh_path,
-        "openfoam_mesh_path": openfoam_mesh_path,
-        "pressure_field_mesh_path": pressure_field_mesh_path,
-        "streamlines_mesh_path": streamlines_mesh_path,
-    }
-    return simulation_metadata
-
-
 def postprocess_task(task_id, task_metadata, split):
     output_dir = download_task(task_id)
     if output_dir is None:
@@ -109,15 +80,26 @@ def postprocess_task(task_id, task_metadata, split):
     pressure_field_mesh.save(pressure_field_mesh_path)
     streamlines_mesh.save(streamlines_mesh_path)
 
+    object_file = task_metadata.get("object_file").replace("image", "object")
+
     with open(simulation_metadata_path, "w", encoding="UTF-8") as f:
-        simulation_metadata = get_simulation_metadata(
-            task_metadata,
-            coeff,
-            input_mesh_path,
-            openfoam_mesh_path,
-            pressure_field_mesh_path,
-            streamlines_mesh_path,
-        )
+        simulation_metadata = {
+            "id": task_metadata.get("task_id"),
+            "object_file": object_file,
+            "wind_speed": task_metadata.get("wind_speed"),
+            "rotate_angle": task_metadata.get("rotate_angle"),
+            "num_iterations": task_metadata.get("num_iterations"),
+            "resolution": task_metadata.get("resolution"),
+            "drag_coefficient": coeff.get("Drag"),
+            "moment_coefficient": coeff.get("Moment"),
+            "lift_coefficient": coeff.get("Lift"),
+            "front_lift_coefficient": coeff.get("Front Lift"),
+            "rear_lift_coefficient": coeff.get("Rear Lift"),
+            "input_mesh_path": input_mesh_path,
+            "openfoam_mesh_path": openfoam_mesh_path,
+            "pressure_field_mesh_path": pressure_field_mesh_path,
+            "streamlines_mesh_path": streamlines_mesh_path,
+        }
         json.dump(simulation_metadata, f, indent=4)
 
 
