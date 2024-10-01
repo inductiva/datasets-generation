@@ -9,7 +9,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_boolean("debug", False, "Enable debug mode")
 
 
-TASKS_FILE = "20k_gcp.jsonl"
+SUBMISSIONS_FILE = "submissions.jsonl"
 DATA_FOLDER = "data"
 INPUT_MESH_FILE = "input_mesh.obj"
 OPENFOAM_MESH_FILE = "openfoam_mesh.obj"
@@ -123,7 +123,7 @@ def main(_):
     if FLAGS.debug:
         logging.set_verbosity(logging.DEBUG)
 
-    postprocess_tasks(TASKS_FILE)
+    postprocess_tasks(SUBMISSIONS_FILE)
 
 
 if __name__ == "__main__":
