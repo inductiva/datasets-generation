@@ -1,3 +1,5 @@
+"""Download and postprocess WindTunnel simulations."""
+
 import json
 import os
 
@@ -7,7 +9,6 @@ from absl import app, flags, logging
 
 FLAGS = flags.FLAGS
 flags.DEFINE_boolean("debug", False, "Enable debug mode")
-
 
 SUBMISSIONS_FILE = "submissions.jsonl"
 DATA_FOLDER = "data"
@@ -29,14 +30,13 @@ def download_task(task_id):
 
 
 def postprocess_tasks(tasks_file):
-    with open(tasks_file, "r") as file:
+    with open(tasks_file, "r", encoding="utf-8") as file:
         for line in file:
             task_metadata = json.loads(line.strip())
             task_id = task_metadata.get("task_id")
             print(f"Processing task: {task_id}")
             object_number = (
-                task_metadata.get("object_file").split("_")[-1].split(".")[0]
-            )
+                task_metadata.get("object_file").split("_")[-1].split(".")[0])
             if int(object_number) < 700:
                 split = "train"
             elif int(object_number) < 900:
@@ -46,7 +46,7 @@ def postprocess_tasks(tasks_file):
             try:
                 postprocess_task(task_id, task_metadata, split)
             except Exception as e:
-                with open(FAILED_SIMULATIONS_FILE, "a") as f:
+                with open(FAILED_SIMULATIONS_FILE, "a", encoding="utf-8") as f:
                     f.write(f"{task_id}\n")
                 print(f"Failed to postprocess task {task_id}: {e}")
             break
@@ -98,9 +98,11 @@ def postprocess_task(task_id, task_metadata, split):
 
     input_mesh_path = os.path.join(output_path, INPUT_MESH_FILE)
     openfoam_mesh_path = os.path.join(output_path, OPENFOAM_MESH_FILE)
-    pressure_field_mesh_path = os.path.join(output_path, PRESSURE_FIELD_MESH_FILE)
+    pressure_field_mesh_path = os.path.join(output_path,
+                                            PRESSURE_FIELD_MESH_FILE)
     streamlines_mesh_path = os.path.join(output_path, STREAMLINES_MESH_FILE)
-    simulation_metadata_path = os.path.join(output_path, SIMULATION_METADATA_FILE)
+    simulation_metadata_path = os.path.join(output_path,
+                                            SIMULATION_METADATA_FILE)
 
     input_mesh.save(input_mesh_path)
     openfoam_mesh.save(openfoam_mesh_path)
