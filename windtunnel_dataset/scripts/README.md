@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains two scripts to facilitate the generation and post-processing of 3D meshes. The meshes are generated from a dataset of images and further processed to ensure they are clean and aligned to their principal axes. These scripts use Instant Meshes for mesh generation and PyVista for mesh manipulation.
+This repository contains two scripts to facilitate the generation and post-processing of 3D meshes. The meshes are generated from a dataset of images and further processed to ensure they are clean and aligned to their principal axes. These scripts use InstantMesh model for mesh generation and PyVista for mesh manipulation.
 
 
 
@@ -13,7 +13,7 @@ This script generates 3D meshes from a dataset of images and allows optional pos
 ### Flags
 
 -	--input_path: Path to the input dataset (default: data/cars196)
--	--config_file: Path to the Instant Meshes configuration file (default: configs/instant-mesh-large.yaml)
+-	--config_file: Path to the InstantMesh configuration file (default: configs/instant-mesh-large.yaml)
 -	--output_path: Path to the output directory (default: data/output)
 -	--output_subdir: Subdirectory for output (default: instant-mesh-large)
 -	--postprocess_meshes: Whether to post-process the meshes after generation (default: True)
@@ -34,7 +34,7 @@ python generate_meshes.py \
 
 ### Key Functionality
 
-- 	**Mesh Generation**: The script iterates over image files and uses a template command to generate meshes with Instant Meshes. The generated mesh files are renamed and saved in the output directory.
+- 	**Mesh Generation**: The script iterates over image files and uses a template command to generate meshes with InstantMesh. The generated mesh files are renamed and saved in the output directory.
 -	**Post-processing**: If enabled, the generated meshes are post-processed using the functions from postprocess_mesh.py.
 
 
