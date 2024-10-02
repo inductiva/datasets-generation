@@ -1,10 +1,10 @@
 # Overview
 
-This repository contains two scripts to facilitate the generation and post-processing of 3D meshes. The meshes are generated from a dataset of images and further processed to ensure they are clean and aligned to their principal axes. These scripts use InstantMesh model for mesh generation and PyVista for mesh manipulation.
+This repository contains two scripts to facilitate the generation and post-processing of 3D meshes. The meshes are generated from a dataset of images and further processed to ensure they are clean and aligned to their principal axes. These scripts use the InstantMesh model for mesh generation and PyVista for mesh manipulation.
 
 
 
-# Scripts
+# Files
 
 ## generate_meshes.py
 

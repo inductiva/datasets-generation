@@ -24,7 +24,7 @@ To install follow these steps:
 
 
 ## Mesh Generation
-To see how to generate meshes using the [InstantMesh](https://github.com/TencentARC/InstantMesh) model, please refer to generate_meshes.py located in the [scripts directory](windtunnel_dataset/scripts/).
+To see how to generate meshes using the [InstantMesh](https://github.com/TencentARC/InstantMesh) model, please refer to generate_meshes.py located in the [mesh generation directory](windtunnel_dataset/mesh_generation).
 
 
 ## Files 
