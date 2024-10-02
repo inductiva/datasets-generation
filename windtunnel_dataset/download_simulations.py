@@ -9,15 +9,34 @@ from absl import app, flags, logging
 
 FLAGS = flags.FLAGS
 flags.DEFINE_boolean("debug", False, "Enable debug mode")
-
-SUBMISSIONS_FILE = "submissions.jsonl"
-DATA_FOLDER = "data"
-INPUT_MESH_FILE = "input_mesh.obj"
-OPENFOAM_MESH_FILE = "openfoam_mesh.obj"
-PRESSURE_FIELD_MESH_FILE = "pressure_field_mesh.vtk"
-STREAMLINES_MESH_FILE = "streamlines_mesh.ply"
-SIMULATION_METADATA_FILE = "simulation_metadata.json"
-FAILED_SIMULATIONS_FILE = "failed_simulations.json"
+flags.DEFINE_string(
+    "submissions_file", "submissions.jsonl", "Path to the submissions file."
+)
+flags.DEFINE_string("data_folder", "data", "Path to the data folder.")
+flags.DEFINE_string("input_mesh_file", "input_mesh.obj", "Name of the input mesh file.")
+flags.DEFINE_string(
+    "openfoam_mesh_file", "openfoam_mesh.obj", "Name of the OpenFOAM mesh file."
+)
+flags.DEFINE_string(
+    "pressure_field_mesh_file",
+    "pressure_field_mesh.vtk",
+    "Name of the pressure field mesh file.",
+)
+flags.DEFINE_string(
+    "streamlines_mesh_file",
+    "streamlines_mesh.ply",
+    "Name of the streamlines mesh file.",
+)
+flags.DEFINE_string(
+    "simulation_metadata_file",
+    "simulation_metadata.json",
+    "Path to the simulation metadata file.",
+)
+flags.DEFINE_string(
+    "failed_simulations_file",
+    "failed_simulations.json",
+    "Path to the failed simulations file.",
+)
 
 
 def download_task(task_id):
@@ -29,8 +48,8 @@ def download_task(task_id):
     return output_dir
 
 
-def postprocess_tasks(tasks_file):
-    with open(tasks_file, "r", encoding="utf-8") as file:
+def postprocess_tasks():
+    with open(FLAGS.submissions_file, "r", encoding="utf-8") as file:
         for line in file:
             task_metadata = json.loads(line.strip())
             task_id = task_metadata.get("task_id")
@@ -46,7 +65,7 @@ def postprocess_tasks(tasks_file):
             try:
                 postprocess_task(task_id, task_metadata, split)
             except Exception as e:
-                with open(FAILED_SIMULATIONS_FILE, "a", encoding="utf-8") as f:
+                with open(FLAGS.failed_simulations_file, "a", encoding="utf-8") as f:
                     f.write(f"{task_id}\n")
                 print(f"Failed to postprocess task {task_id}: {e}")
             break
@@ -64,16 +83,14 @@ def postprocess_task(task_id, task_metadata, split):
     pressure_field_mesh = outputs.get_interpolated_pressure_field()
     streamlines_mesh = outputs.get_streamlines()
 
-    output_path = os.path.join(DATA_FOLDER, split, task_id)
+    output_path = os.path.join(FLAGS.data_folder, split, task_id)
     os.makedirs(output_path, exist_ok=True)
 
-    input_mesh_path = os.path.join(output_path, INPUT_MESH_FILE)
-    openfoam_mesh_path = os.path.join(output_path, OPENFOAM_MESH_FILE)
-    pressure_field_mesh_path = os.path.join(output_path,
-                                            PRESSURE_FIELD_MESH_FILE)
-    streamlines_mesh_path = os.path.join(output_path, STREAMLINES_MESH_FILE)
-    simulation_metadata_path = os.path.join(output_path,
-                                            SIMULATION_METADATA_FILE)
+    input_mesh_path = os.path.join(output_path, FLAGS.input_mesh_file)
+    openfoam_mesh_path = os.path.join(output_path, FLAGS.openfoam_mesh_file)
+    pressure_field_mesh_path = os.path.join(output_path, FLAGS.pressure_field_mesh_file)
+    streamlines_mesh_path = os.path.join(output_path, FLAGS.streamlines_mesh_file)
+    simulation_metadata_path = os.path.join(output_path, FLAGS.simulation_metadata_file)
 
     input_mesh.save(input_mesh_path)
     openfoam_mesh.save(openfoam_mesh_path)
@@ -107,7 +124,7 @@ def main(_):
     if FLAGS.debug:
         logging.set_verbosity(logging.DEBUG)
 
-    postprocess_tasks(SUBMISSIONS_FILE)
+    postprocess_tasks()
 
 
 if __name__ == "__main__":
