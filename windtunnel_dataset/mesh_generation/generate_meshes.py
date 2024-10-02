@@ -10,37 +10,36 @@ from tqdm import tqdm
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("input_path", "data/cars196", "Path to the input data.")
-flags.DEFINE_string(
-    "config_file", "configs/instant-mesh-large.yaml", "Path to the config file."
-)
-flags.DEFINE_string("output_path", "data/output", "Path to the output directory.")
-flags.DEFINE_string("output_subdir", "instant-mesh-large", "Subdirectory for output.")
+flags.DEFINE_string("config_file", "configs/instant-mesh-large.yaml",
+                    "Path to the config file.")
+flags.DEFINE_string("output_path", "data/output",
+                    "Path to the output directory.")
+flags.DEFINE_string("output_subdir", "instant-mesh-large",
+                    "Subdirectory for output.")
 flags.DEFINE_bool("postprocess_meshes", True, "Post process meshes.")
 flags.DEFINE_bool("debug", False, "Enable debug logging.")
 
-COMMAND_TEMPLATE = (
-    "python run.py {config} {input_file} --save_video " "--output_path {output_path}"
-)
+COMMAND_TEMPLATE = ("python run.py {config} {input_file} --save_video "
+                    "--output_path {output_path}")
 
 
 def natural_sort_key(s):
     return [
         int(text) if text.isdigit() else text.lower()
-        for text in re.split(r'(\d+)', s)
+        for text in re.split(r"(\d+)", s)
     ]
 
 
-def generate_meshes(meshes_dir):
+def generate_meshes():
     meshes_dir = os.path.join(FLAGS.output_path, FLAGS.output_subdir, "meshes")
-    meshes_processed_dir = os.path.join(
-        FLAGS.output_path, FLAGS.output_subdir, "meshes_processed"
-    )
+    meshes_processed_dir = os.path.join(FLAGS.output_path, FLAGS.output_subdir,
+                                        "meshes_processed")
 
     os.makedirs(meshes_processed_dir, exist_ok=True)
 
     files = os.listdir(FLAGS.input_path)
     image_files = sorted(
-        [f for f in files if f.endswith('.jpg') or f.endswith('.png')],
+        [f for f in files if f.endswith(".jpg") or f.endswith(".png")],
         key=natural_sort_key,
     )
 

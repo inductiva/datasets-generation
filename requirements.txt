@@ -5,4 +5,5 @@ tqdm
 trimesh
 vtk
 inductiva
+datasets
 git+https://github.com/inductiva/wind-tunnel.git

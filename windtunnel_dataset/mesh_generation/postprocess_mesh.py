@@ -33,7 +33,8 @@ def _extract_largest_connected_region(mesh):
 
     regions = connectivity_filter.GetOutput()
 
-    region_ids = numpy_support.vtk_to_numpy(regions.GetCellData().GetArray("RegionId"))
+    region_ids = numpy_support.vtk_to_numpy(
+        regions.GetCellData().GetArray("RegionId"))
 
     unique_region_ids, counts = np.unique(region_ids, return_counts=True)
 
