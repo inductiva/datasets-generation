@@ -1,2 +1,8 @@
+absl-py
+numpy
+pyvista
+tqdm
+trimesh
+vtk
+inductiva
 git+https://github.com/inductiva/wind-tunnel.git
-datasets
