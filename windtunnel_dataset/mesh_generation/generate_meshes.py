@@ -58,14 +58,14 @@ def generate_meshes():
         try:
             subprocess.run(command, shell=True, check=True)
             os.rename(obj_path, obj_path_renamed)
-            print(f'Successfully generated mesh_{i}.obj')
+            print(f"Successfully generated mesh_{i}.obj")
 
             if FLAGS.postprocess_meshes:
                 postprocess_mesh.postprocess_mesh(obj_path, processed_obj_path)
-                print(f'Successfully processed mesh_{i}.obj')
+                print(f"Successfully processed mesh_{i}.obj")
 
         except subprocess.CalledProcessError as e:
-            print(f'Error occurred while processing {filename}: {e}')
+            print(f"Error occurred while processing {filename}: {e}")
 
 
 def main(_):
