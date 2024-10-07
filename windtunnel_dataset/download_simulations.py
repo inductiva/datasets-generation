@@ -56,7 +56,8 @@ def postprocess_tasks():
             try:
                 postprocess_task(task_id, task_metadata)
             except Exception as e:
-                with open(FLAGS.failed_simulations_file, "a", encoding="utf-8") as f:
+                with open(FLAGS.failed_simulations_file, "a",
+                          encoding="utf-8") as f:
                     f.write(f"{task_id}\n")
                 print(f"Failed to postprocess task {task_id}: {e}")
             break
