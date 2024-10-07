@@ -89,7 +89,7 @@ python run_simulations.py \
 
 ### File: download_simulations.py
 
-This file downloads and postprocesses the results of the wind tunnel simulations. It gets data such as force coefficients, pressure fields, and streamlines, and organizes them into structured files based on dataset splits (train, validation, test).
+This file downloads and postprocesses the results of the wind tunnel simulations. It gets data such as force coefficients, pressure fields, and streamlines.
 
 #### Flags:
 -  debug: Enable debug mode (default: False).

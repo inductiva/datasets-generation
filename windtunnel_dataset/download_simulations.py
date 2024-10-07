@@ -53,25 +53,16 @@ def postprocess_tasks():
             task_metadata = json.loads(line.strip())
             task_id = task_metadata.get("task_id")
             print(f"Processing task: {task_id}")
-            object_number = (
-                task_metadata.get("object_file").split("_")[-1].split(".")[0])
-            if int(object_number) < 700:
-                split = "train"
-            elif int(object_number) < 900:
-                split = "val"
-            else:
-                split = "test"
             try:
-                postprocess_task(task_id, task_metadata, split)
+                postprocess_task(task_id, task_metadata)
             except Exception as e:
-                with open(FLAGS.failed_simulations_file, "a",
-                          encoding="utf-8") as f:
+                with open(FLAGS.failed_simulations_file, "a", encoding="utf-8") as f:
                     f.write(f"{task_id}\n")
                 print(f"Failed to postprocess task {task_id}: {e}")
             break
 
 
-def postprocess_task(task_id, task_metadata, split):
+def postprocess_task(task_id, task_metadata):
     output_dir = download_task(task_id)
     if output_dir is None:
         return
@@ -83,7 +74,7 @@ def postprocess_task(task_id, task_metadata, split):
     pressure_field_mesh = outputs.get_interpolated_pressure_field()
     streamlines_mesh = outputs.get_streamlines()
 
-    output_path = os.path.join(FLAGS.data_folder, split, task_id)
+    output_path = os.path.join(FLAGS.data_folder, task_id)
     os.makedirs(output_path, exist_ok=True)
 
     input_mesh_path = os.path.join(output_path, FLAGS.input_mesh_file)
