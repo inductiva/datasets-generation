@@ -1,4 +1,4 @@
-""" This module contains functions to preprocess 3D meshes. """
+"""This module contains functions to postprocess 3D meshes."""
 
 import numpy as np
 import pyvista as pv
@@ -34,7 +34,7 @@ def _extract_largest_connected_region(mesh):
     regions = connectivity_filter.GetOutput()
 
     region_ids = numpy_support.vtk_to_numpy(
-        regions.GetCellData().GetArray('RegionId'))
+        regions.GetCellData().GetArray("RegionId"))
 
     unique_region_ids, counts = np.unique(region_ids, return_counts=True)
 
@@ -88,13 +88,13 @@ def _align_mesh_to_principal_axes(mesh):
 
     aligned_mesh = aligned_mesh.rotate_x(-90)
 
-    aligned_mesh.save('temp_mesh.stl')
-    aligned_mesh = trimesh.load_mesh('temp_mesh.stl')
+    aligned_mesh.save("temp_mesh.stl")
+    aligned_mesh = trimesh.load_mesh("temp_mesh.stl")
 
     return aligned_mesh
 
 
-def preprocess_mesh(obj_path, save_path):
+def postprocess_mesh(obj_path, save_path):
     """
     Extracts the largest connected region and aligns the mesh
         to the principal axes
@@ -107,4 +107,4 @@ def preprocess_mesh(obj_path, save_path):
 
     mesh = _align_mesh_to_principal_axes(mesh)
 
-    mesh.export(save_path, file_type='obj')
+    mesh.export(save_path, file_type="obj")
